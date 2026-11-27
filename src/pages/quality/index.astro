@@ -1,0 +1,37 @@
+---
+import SiteLayout from '../../layouts/SiteLayout.astro';
+import { risks } from '../../data/quality';
+import { profile } from '../../data/portfolio';
+import { sitePath } from '../../lib/paths';
+---
+<SiteLayout title="How I tested this site — Denis Peralta" description="The risks, test coverage, and verification evidence behind this portfolio." section="quality">
+  <article>
+    <header class="frame detail-hero quality-hero">
+      <a class="text-link return-link" href={sitePath()}>Back to home</a>
+      <p class="mono case-company">Site QA</p>
+      <h1>How I tested this site<span>.</span></h1>
+      <p class="detail-intro">I prioritized the paths a recruiter needs most: find a case, open it directly, read it on any screen, and get in touch.</p>
+    </header>
+    <div class="light-chapter">
+      <section class="frame chapter quality-section" aria-labelledby="risk-heading">
+        <div class="chapter-heading"><h2 id="risk-heading">Risk and test coverage<span>.</span></h2></div>
+        <dl class="risk-list">
+          {risks.map((risk) => (
+            <div class="risk-row">
+              <dt><span class="mono">{risk.id} / {risk.priority}</span>{risk.risk}</dt>
+              <dd><p>{risk.requirement}</p><p class="summary">{risk.evidence}</p></dd>
+            </div>
+          ))}
+        </dl>
+      </section>
+    </div>
+    <section class="frame chapter quality-section" aria-labelledby="review-heading">
+      <div class="chapter-heading"><h2 id="review-heading">Exploratory review<span>.</span></h2></div>
+      <div class="quality-copy">
+        <p>I inspected the home page at desktop and mobile sizes and checked that the navigation and headlines fit in portrait and landscape. I followed the skip link by keyboard and watched the pinned case sequence advance on desktop.</p>
+        <p>The test suite records route, asset, focus, and motion behavior. The review log records the viewport sizes, accessibility checks, and the local Lighthouse run.</p>
+        <p><a class="text-link" href={`${profile.repository}/blob/master/tests/portfolio.spec.ts`}>View the Playwright tests on GitHub</a></p>
+      </div>
+    </section>
+  </article>
+</SiteLayout>

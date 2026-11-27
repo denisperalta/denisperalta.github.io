@@ -1,0 +1,156 @@
+---
+import SiteLayout from '../layouts/SiteLayout.astro';
+import Signal from '../components/Signal.astro';
+import CaseVisual from '../components/CaseVisual.astro';
+import { capabilities, caseStudies, credentials, freelance, profile } from '../data/portfolio';
+import { sitePath } from '../lib/paths';
+
+const desktopMotionQuery = '(min-width: 960px) and (min-height: 620px) and (prefers-reduced-motion: no-preference)';
+---
+<SiteLayout title="Denis Peralta — QA Engineer" description={profile.intro}>
+  <div class="reading-progress" aria-hidden="true"></div>
+  <section class="frame hero" aria-labelledby="hero-title">
+    <div class="hero-copy">
+      <p class="hero-role mono" data-hero-enter><span></span>{profile.role}</p>
+      <h1 id="hero-title" class="hero-title" aria-label={profile.name}>
+        <span class="name-mask"><span class="name-line">Denis</span></span>
+        <span class="name-mask"><span class="name-line name-last">Peralta</span></span>
+      </h1>
+      <p class="hero-intro" data-hero-enter>{profile.intro}</p>
+      <div class="hero-actions" data-hero-enter>
+        <a class="button button-primary" href="#work">View selected work</a>
+        <a class="button button-secondary" href="#contact">Get in touch</a>
+      </div>
+    </div>
+    <div class="hero-art">
+      <Signal />
+      <p class="hero-location mono"><span></span>{profile.location}</p>
+    </div>
+  </section>
+
+  <section id="work" class="frame chapter work-chapter" aria-labelledby="work-title">
+    <div class="chapter-heading">
+      <h2 id="work-title">Selected work<span>.</span></h2>
+    </div>
+    <div class="work-grid">
+      {caseStudies.map((study) => (
+        <article class="work-card">
+          <CaseVisual kind={study.kind} />
+          <div class="work-card-copy">
+            <p class="case-company mono">{study.company} / {study.role}</p>
+            <h3><a href={sitePath(`work/${study.slug}/`)}>{study.title}</a></h3>
+            <p class="summary">{study.summary}</p>
+            <ul class="tag-list" aria-label="Methods and tools">
+              {study.tools.map((tool) => <li>{tool}</li>)}
+            </ul>
+          </div>
+        </article>
+      ))}
+    </div>
+
+    <div class="showcase-track" data-motion-query={desktopMotionQuery} hidden aria-hidden="true">
+      <div class="showcase-sticky">
+        <div class="showcase-stage" data-active-case={caseStudies[0].slug}>
+          {caseStudies.map((study) => (
+            <div class="showcase-panel" data-case={study.slug}>
+              <div class="showcase-copy">
+                <p class="mono case-company">{study.company} / {study.role}</p>
+                <p class="showcase-title">{study.title}</p>
+                <p class="summary">{study.summary}</p>
+              </div>
+              <CaseVisual kind={study.kind} />
+            </div>
+          ))}
+          <div class="showcase-position">
+            {caseStudies.map((study) => <span data-case-marker={study.slug}>{study.company}</span>)}
+          </div>
+        </div>
+      </div>
+    </div>
+    <script is:inline>
+      {
+        const track = document.currentScript?.previousElementSibling;
+        if (track && window.matchMedia(track.dataset.motionQuery).matches) track.hidden = false;
+      }
+    </script>
+
+  </section>
+
+  <div class="light-chapter" data-light-chapter>
+    <section id="experience" class="frame chapter" aria-labelledby="experience-title">
+      <div class="chapter-heading">
+        <h2 id="experience-title">Experience<span>.</span></h2>
+      </div>
+      <div class="timeline">
+        {caseStudies.map((study) => (
+          <article class="timeline-row">
+            <p class="timeline-date mono">{study.dates}<span>{study.location}</span></p>
+            <div>
+              <h3>{study.company}</h3>
+              <p class="timeline-role">{study.role}</p>
+            </div>
+            <p class="summary">{study.summary}</p>
+          </article>
+        ))}
+      </div>
+      <h3 class="additional-title">Additional work</h3>
+      <div class="timeline">
+        {freelance.map((work) => (
+          <article class="timeline-row">
+            <p class="timeline-date mono">{work.dates}<span>{work.location}</span></p>
+            <div>
+              <h4>{work.company}</h4>
+              <p class="timeline-role">{work.role}</p>
+            </div>
+            <div class="timeline-summary">
+              <p class="summary">{work.summary}</p>
+              {work.url && <a class="text-link" href={work.url}>View the {work.company} project</a>}
+            </div>
+          </article>
+        ))}
+      </div>
+    </section>
+
+    <section id="capabilities" class="frame chapter compact-chapter" aria-labelledby="capabilities-title">
+      <div class="chapter-heading">
+        <h2 id="capabilities-title">Capabilities<span>.</span></h2>
+      </div>
+      <dl class="capability-grid">
+        {capabilities.map((capability) => (
+          <div class="capability"><dt>{capability.title}</dt><dd>{capability.details}</dd></div>
+        ))}
+      </dl>
+    </section>
+  </div>
+
+  <section id="credentials" class="frame chapter" aria-labelledby="credentials-title">
+    <div class="chapter-heading">
+      <h2 id="credentials-title">Credentials<span>.</span></h2>
+    </div>
+    <ul class="credential-list">
+      {credentials.map((credential) => (
+        <li>
+          <span class="credential-title">{credential.title}</span>
+          <span class="summary">{credential.issuer}</span>
+          <span class="mono">{credential.year}</span>
+        </li>
+      ))}
+    </ul>
+  </section>
+
+  <section id="contact" class="contact-chapter" aria-labelledby="contact-title">
+    <div class="frame chapter contact-inner">
+      <div>
+        <p class="chapter-label mono">Contact</p>
+        <h2 id="contact-title">Let’s talk<span>.</span></h2>
+        <p>I’m interested in QA Automation and SDET opportunities.</p>
+      </div>
+      <a class="button button-dark" href={profile.linkedin}>Connect on LinkedIn</a>
+    </div>
+  </section>
+</SiteLayout>
+
+<script>
+  import { setupHomeMotion } from '../scripts/motion';
+  setupHomeMotion();
+</script>

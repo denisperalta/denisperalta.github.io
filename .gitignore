@@ -1,0 +1,11 @@
+node_modules/
+dist/
+.astro/
+.npm-cache/
+.playwright-browsers/
+playwright-report/
+test-results/
+.qa-local/
+.lighthouseci/
+lighthouse-mobile.json
+.env*

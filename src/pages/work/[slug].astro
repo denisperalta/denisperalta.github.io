@@ -1,0 +1,76 @@
+---
+import SiteLayout from '../../layouts/SiteLayout.astro';
+import CaseVisual from '../../components/CaseVisual.astro';
+import { caseStudies, voiceExamples } from '../../data/portfolio';
+import { sitePath } from '../../lib/paths';
+import type { GetStaticPaths, InferGetStaticPropsType } from 'astro';
+
+export const getStaticPaths = (() => caseStudies.map((study) => ({
+  params: { slug: study.slug },
+  props: { study },
+}))) satisfies GetStaticPaths;
+type Props = InferGetStaticPropsType<typeof getStaticPaths>;
+const { study } = Astro.props;
+const other = caseStudies.find((entry) => entry.slug !== study.slug)!;
+---
+<SiteLayout title={`${study.title} — Denis Peralta`} description={study.summary} section="work">
+  <article class="case-page">
+    <header class="frame detail-hero">
+      <a class="text-link return-link" href={sitePath('#work')}>Back to selected work</a>
+      <div class="detail-hero-grid">
+        <div>
+          <p class="mono case-company">{study.company} / {study.role}</p>
+          <h1>{study.title}</h1>
+          <p class="detail-intro">{study.summary}</p>
+          <p class="mono detail-date">{study.dates} · {study.location}</p>
+        </div>
+        <CaseVisual kind={study.kind} />
+      </div>
+    </header>
+    <div class="light-chapter">
+      <div class="frame case-body">
+        {study.sections.map((section) => (
+          <section class="case-section">
+            <h2>{section.title}</h2>
+            <p>{section.body}</p>
+          </section>
+        ))}
+        <section class="case-section">
+          <h2>Public evidence</h2>
+          <div>
+            <p>{study.kind === 'trading'
+              ? 'My résumé documents the scope of my functional testing, the use of Playwright, and the audiences for my demos. The graphic above is an illustration.'
+              : 'My résumé documents the two languages I tested, the types of testing I performed, and my Python usage-data analysis. The graphic above is an illustration.'}</p>
+            {study.kind === 'voice' && (
+              <div class="voice-example">
+                <h3 id="voice-example-title">Illustrative example</h3>
+                <p>These synthetic scenarios show how I would record expected and observed responses in a bilingual test matrix.</p>
+                <p class="table-hint mono">Scroll the table to read all columns.</p>
+                <div class="table-scroll" role="region" aria-labelledby="voice-example-title" tabindex="0">
+                  <table>
+                    <caption class="visually-hidden">Synthetic voice-assistant response matrix</caption>
+                    <thead><tr><th scope="col">Utterance</th><th scope="col">Language</th><th scope="col">Expected</th><th scope="col">Observed</th></tr></thead>
+                    <tbody>
+                      {voiceExamples.map((example) => (
+                        <tr>
+                          <th scope="row" lang={example.code}>{example.phrase}</th>
+                          <td>{example.language}</td>
+                          <td>{example.expected}</td>
+                          <td>{example.observed}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+          </div>
+        </section>
+      </div>
+    </div>
+    <div class="frame next-case">
+      <p class="mono case-company">Next case</p>
+      <a href={sitePath(`work/${other.slug}/`)}>{other.title}</a>
+    </div>
+  </article>
+</SiteLayout>

@@ -1,0 +1,18 @@
+---
+const amplitudes = [
+  4, 6, 8, 5, 11, 15, 25, 38, 27, 12, 6, 10, 23, 39, 61, 78, 91, 69, 44, 23,
+  12, 22, 49, 72, 100, 79, 56, 31, 19, 11, 14, 25, 46, 66, 51, 30, 17, 9, 13, 27,
+  40, 28, 15, 8, 11, 7, 5, 4,
+];
+---
+<div class="signal" aria-hidden="true">
+  <div class="signal-top mono"><span>VOICE SIGNAL</span><span>ES / PT</span></div>
+  <div class="signal-grid">
+    <span class="signal-cross signal-cross-top">+</span>
+    <div class="signal-wave">
+      {amplitudes.map((height) => <i style={`--amplitude: ${height}%`}></i>)}
+    </div>
+    <span class="signal-cross signal-cross-bottom">+</span>
+  </div>
+  <div class="signal-bottom mono"><span>BILINGUAL QA</span><span class="signal-indicator"></span></div>
+</div>

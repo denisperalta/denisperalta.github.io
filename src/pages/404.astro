@@ -1,0 +1,12 @@
+---
+import SiteLayout from '../layouts/SiteLayout.astro';
+import { sitePath } from '../lib/paths';
+---
+<SiteLayout title="Page not found — Denis Peralta" description="This page could not be found." noIndex>
+  <section class="frame detail-hero error-page">
+    <p class="mono case-company">404</p>
+    <h1>Page not found</h1>
+    <p class="detail-intro">You can browse my selected work from the home page.</p>
+    <a class="button button-primary" href={sitePath()}>Back to home</a>
+  </section>
+</SiteLayout>

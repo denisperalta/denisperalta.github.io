@@ -1,0 +1,93 @@
+name: Verify and publish portfolio
+
+on:
+  pull_request:
+    branches: [master]
+  push:
+    branches: [master]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: portfolio-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  verify:
+    name: Verify ${{ matrix.target }} build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: root
+            base: '/'
+          - target: prefix
+            base: '/portfolio-preview'
+    env:
+      SITE_BASE: ${{ matrix.base }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - run: npm run check
+      - run: npm run build
+      - name: Install Playwright browsers and OS dependencies
+        run: npx playwright install --with-deps chromium firefox webkit
+      - name: Test the static build
+        run: npm test
+      - name: Upload the Playwright report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: playwright-report-${{ matrix.target }}
+          path: playwright-report/
+          retention-days: 14
+      - name: Upload the verified production build
+        if: ${{ matrix.target == 'root' && github.ref == 'refs/heads/master' && github.event_name == 'push' }}
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: dist/
+
+  deploy:
+    name: Deploy to GitHub Pages
+    if: ${{ github.ref == 'refs/heads/master' && github.event_name == 'push' }}
+    needs: verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    outputs:
+      page_url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Publish the verified production build
+        id: deployment
+        uses: actions/deploy-pages@v5
+
+  smoke:
+    name: Verify the deployed portfolio
+    needs: deploy
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+      - name: Check the public HTML routes
+        run: node scripts/smoke-pages.mjs
+        env:
+          PAGES_URL: ${{ needs.deploy.outputs.page_url }}
