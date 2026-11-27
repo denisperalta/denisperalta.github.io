@@ -2,9 +2,9 @@ name: Verify and publish portfolio
 
 on:
   pull_request:
-    branches: [master]
+    branches: [develop, master]
   push:
-    branches: [master]
+    branches: [develop, master]
 
 permissions:
   contents: read

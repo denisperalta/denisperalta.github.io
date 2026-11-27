@@ -4,7 +4,7 @@ An English-language portfolio for QA Automation and SDET hiring teams. It includ
 
 ## Local development
 
-Use Node.js 24 and npm.
+Start from `develop` for portfolio changes. Use Node.js 24 and npm with the committed lockfile.
 
 ```sh
 npm ci
@@ -21,8 +21,11 @@ npm run preview
 
 ## Tests
 
+Run the full checks from `develop` with `SITE_BASE` unset to verify the root configuration.
+
 ```sh
 npx playwright install chromium firefox webkit
+npm run check
 npm run build
 npm test
 npx playwright show-report
@@ -30,23 +33,26 @@ npx playwright show-report
 
 Playwright starts a loopback static server for `dist/`. Tests run on desktop Chromium, Firefox, and WebKit, plus emulated Android and iOS devices. See the [QA matrix and verification log](docs/qa.md) for coverage, exploratory checks, and the Lighthouse setup.
 
-To check a project-site prefix on PowerShell:
+Repeat the checks with `/portfolio-preview` to verify the project-site configuration. In PowerShell, set `SITE_BASE` for the check, build, and test commands, then restore the root build.
 
 ```powershell
 $env:SITE_BASE = '/portfolio-preview'
+npm run check
 npm run build
 npm test
 Remove-Item Env:SITE_BASE
 npm run build
 ```
 
-On Bash, run `SITE_BASE=/portfolio-preview npm run build` followed by `SITE_BASE=/portfolio-preview npm test`. Run `npm run build` again to return `dist/` to the root configuration.
+In Bash, prefix `npm run check`, `npm run build`, and `npm test` with `SITE_BASE=/portfolio-preview`. Run `npm run build` in the root configuration afterward to restore `dist/`.
 
 ## GitHub Pages
 
 1. In the repository, open **Settings → Pages** and select **GitHub Actions** under **Build and deployment → Source**.
-2. Merge the changes into `master`. The [workflow](.github/workflows/pages.yml) checks the root and prefixed builds and deploys the verified root `dist/` on pushes to `master`. The `github-pages` environment must allow this branch.
-3. Check the deployment and its smoke job in **Actions**. Open the deployment URL, refresh each case directly, and verify that an unknown URL returns the custom 404. Run `node scripts/smoke-pages.mjs` to repeat the public HTTP checks.
+2. Test changes on `develop` and push them there. The [GitHub Actions workflow](.github/workflows/pages.yml) verifies the root and `/portfolio-preview` builds on pushes to `develop` and `master` and on pull requests targeting either branch.
+3. Open a pull request from `develop` into `master`. Bring `develop` up to date with `master`, then wait for **Verify root build** and **Verify prefix build** to pass on the updated branch before merging.
+4. A push to `master` publishes the verified root `dist/` once both build checks pass. The `github-pages` environment must allow this branch. Check the deployment and its smoke job in **Actions**. Open the deployment URL, refresh each case directly, and verify that an unknown URL returns the custom 404. Run `node scripts/smoke-pages.mjs` to repeat the public HTTP checks.
+5. After the release, merge the latest `master` back into `develop` and push `develop` to keep the branches in sync.
 
 The user-site origin is `https://denisperalta.github.io` and its production base is `/`. To move this source to a GitHub Pages project site under the same owner, set the production matrix entry’s `base` to `/<repo>` and keep the second entry at a different prefix. Preview and test with that same `SITE_BASE`. For a different origin, update `site` in [astro.config.mjs](astro.config.mjs) and the expected origin and default URL in the [public smoke script](scripts/smoke-pages.mjs).
 
