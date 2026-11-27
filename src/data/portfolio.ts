@@ -121,9 +121,9 @@ export const capabilities = [
 
 export const credentials = [
   { title: 'Certified Tester Foundation Level', issuer: 'BSTQB', year: '2024' },
-  { title: 'Computer Engineer', issuer: 'Uninorte', year: '2014–2020' },
   { title: 'English proficiency, C2', issuer: 'EF SET', year: '2022' },
   { title: 'Recognition Award', issuer: 'Samsung', year: '2022' },
+  { title: 'Computer Engineer', issuer: 'Uninorte', year: '2014–2020' },
 ] as const;
 
 export const voiceExamples = [

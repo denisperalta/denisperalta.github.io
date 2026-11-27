@@ -2,21 +2,21 @@
   font-family: "Bricolage Grotesque";
   src: url("@fontsource-variable/bricolage-grotesque/files/bricolage-grotesque-latin-wght-normal.woff2") format("woff2");
   font-weight: 200 800;
-  font-display: swap;
+  font-display: optional;
 }
 
 @font-face {
   font-family: Inter;
   src: url("@fontsource-variable/inter/files/inter-latin-wght-normal.woff2") format("woff2");
   font-weight: 100 900;
-  font-display: swap;
+  font-display: optional;
 }
 
 @font-face {
   font-family: "IBM Plex Mono";
   src: url("@fontsource/ibm-plex-mono/files/ibm-plex-mono-latin-400-normal.woff2") format("woff2");
   font-weight: 400;
-  font-display: swap;
+  font-display: optional;
 }
 
 :root {
@@ -138,8 +138,7 @@ h1, h2, h3, h4 { font-family: var(--heading); line-height: 1.03; }
   letter-spacing: -.055em;
   line-height: .79;
 }
-.name-mask { display: block; overflow: clip; overflow-clip-margin: .2em; padding: .035em 0 .105em; }
-.name-line { display: block; width: max-content; }
+.name-line { display: block; width: max-content; padding: .035em 0 .105em; }
 .name-last::after { content: "." / ""; color: var(--lime); }
 .hero-intro, .detail-intro {
   max-inline-size: 36rem;
@@ -262,35 +261,6 @@ h1, h2, h3, h4 { font-family: var(--heading); line-height: 1.03; }
 .voice-bars i { background: #bbd8ea; }
 .voice-bars i:nth-child(3n) { background: var(--lime); }
 
-.showcase-track { margin-block-start: clamp(1.5rem, 4vw, 3.5rem); padding-block-end: 95vh; }
-.showcase-sticky { border: 1px solid var(--line-dark); background: #171a20; }
-.showcase-stage { display: grid; grid-template-areas: "panels" "position"; }
-.showcase-panel {
-  grid-area: panels;
-  display: grid;
-  visibility: hidden;
-  grid-template-columns: minmax(0, .85fr) minmax(0, 1.15fr);
-  gap: clamp(1.5rem, 4vw, 4rem);
-  align-items: center;
-  min-height: min(52vh, 32rem);
-  padding: clamp(1.4rem, 4vw, 3.5rem);
-}
-[data-active-case="trading-platform"] [data-case="trading-platform"],
-[data-active-case="bilingual-voice-assistant"] [data-case="bilingual-voice-assistant"] { visibility: visible; }
-.showcase-copy { display: grid; gap: .85rem; }
-.showcase-title { font: 750 clamp(2rem, 4.05vw, 4.25rem)/.99 var(--heading); letter-spacing: -.045em; }
-.showcase-position {
-  grid-area: position;
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  background: var(--dark);
-  color: var(--cool);
-  font: .8125rem var(--mono);
-}
-.showcase-position span { padding: .6rem 1rem; border-top: 1px solid var(--line-dark); }
-[data-active-case="trading-platform"] [data-case-marker="trading-platform"],
-[data-active-case="bilingual-voice-assistant"] [data-case-marker="bilingual-voice-assistant"] { border-top-color: var(--lime); color: var(--lime); }
-
 .light-chapter {
   color-scheme: light;
   --muted: var(--ink-muted);
@@ -381,10 +351,7 @@ tbody th { font-weight: 500; }
 @media (prefers-reduced-motion: no-preference) {
   .button, .work-card { transition: background-color .17s ease, border-color .17s ease, color .17s ease; }
   @view-transition { navigation: auto; }
-  ::view-transition-old(root) { animation: .15s ease-out both page-out; }
-  ::view-transition-new(root) { animation: .23s ease-out both page-in; }
-  @keyframes page-out { to { opacity: 0; } }
-  @keyframes page-in { from { opacity: 0; transform: translateY(7px); } }
+  ::view-transition-old(root), ::view-transition-new(root) { animation-duration: .16s; }
 }
 
 @media (max-width: 850px) {
@@ -432,5 +399,5 @@ tbody th { font-weight: 500; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .reading-progress, .showcase-track { display: none; }
+  .reading-progress { display: none; }
 }

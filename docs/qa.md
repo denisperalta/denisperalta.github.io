@@ -6,7 +6,8 @@
 | --- | --- | --- | --- | --- |
 | PAGES-01 | High | Hosting breaks routes, assets, or fallback behavior | Home, both cases, and Site QA open directly and on refresh. Canonical paths, favicon, social card, and local fonts respect root and prefix. An unknown route returns the custom 404. | Playwright response, metadata, asset, and reload checks. The post-deployment smoke checks live HTTP routes. |
 | A11Y-01 | High | A keyboard user cannot reach the main content or case links | The skip link moves focus to main. Critical navigation takes visible focus and activates by keyboard. | Playwright focus and activation checks, axe WCAG 2.0 and 2.1 AA rules on home, both cases, and Site QA, and exploratory review. |
-| MOTION-01 | High | Motion blocks content or removes visitor control | The desktop reel presents both cases with native scroll. Reduced motion removes pinning, and essential links work with scripts disabled. | Playwright scroll and preference checks, a script-free context, and visual inspection of the reel. |
+| MOTION-01 | High | Motion blocks content or removes visitor control | Each case appears once in the normal page flow. Experience follows the cards, and Back returns to the work links. | Playwright flow, history, media preference, and script-free checks. |
+| VISUAL-01 | Medium | Late fonts shift visible text | The headline, navigation, intro, and actions keep their positions after first paint. | Chromium compares bounding rectangles while font responses are delayed and after they arrive. |
 | RESP-01 | High | The header, name, or actions overflow at small widths | Navigation remains usable at 699, 700, and 701 CSS px and in mobile browsers. | Breakpoint and touch checks, portrait and landscape inspection, and browser zoom review. |
 | NAV-01 | Medium | Recruiters lose the path from work to contact | The hero actions reach their destinations, opening a case works, and browser Back returns to work. | Playwright recruiter journey across all five browser projects. |
 | ASSET-01 | High | An unapproved résumé is exposed | The build and navigation include PDF assets only after approval of a public copy. | Playwright checks the build tree, the former PDF path, and the presence of a download link. |
@@ -26,6 +27,13 @@ The test identifiers appear in [the Playwright spec](../tests/portfolio.spec.ts)
 - Checked foreground/background pairs with the WCAG contrast formula and inspected the rendered styles. Ivory on dark measured 16.18:1, grey on dark 8.61:1, muted body text on ivory 7.51:1, and muted text at the darker start of the ivory transition 6.55:1. The light focus ring on ivory measured 8.92:1.
 
 The review used Windows, locally served static files, emulated mobile devices, and no physical-device or screen-reader session. The deployment workflow has its own public smoke job for the GitHub Pages environment.
+
+## First-paint and scrolling follow-up
+
+- Checked the home page, both cases, Site QA, and the 404 in Chromium desktop and Pixel 7 emulation. The first painted text kept its measured bounds after all three delayed font responses arrived. A separate delayed-script check on the home page found no text movement when GSAP initialized.
+- Confirmed that an ordinary cold desktop load rendered the locally hosted display font. The site preloads all three fonts and keeps the first-paint fallback when a font arrives too late.
+- Reached Experience from the last work card with the mouse wheel, Page Down, and an emulated touch swipe. The desktop gap between the last card and Experience measured 115 CSS px at 1440 × 850. The browser suite also checks Back navigation, reduced motion, and navigation with JavaScript disabled.
+- The root and prefixed builds each passed 89 Playwright checks, with 16 planned project-specific skips. The repeat local mobile Lighthouse sample reported 100 for performance, 100 for accessibility, and zero cumulative layout shift.
 
 ## Lighthouse mobile
 

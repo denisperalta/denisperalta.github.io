@@ -1,6 +1,9 @@
 ---
 import '../styles/global.css';
 import { sitePath } from '../lib/paths';
+import headingFont from '@fontsource-variable/bricolage-grotesque/files/bricolage-grotesque-latin-wght-normal.woff2?url';
+import bodyFont from '@fontsource-variable/inter/files/inter-latin-wght-normal.woff2?url';
+import monoFont from '@fontsource/ibm-plex-mono/files/ibm-plex-mono-latin-400-normal.woff2?url';
 
 interface Props {
   title: string;
@@ -22,6 +25,9 @@ const socialImage = new URL(sitePath('social.png'), Astro.site);
     <meta name="description" content={description} />
     {noIndex && <meta name="robots" content="noindex" />}
     {!noIndex && <link rel="canonical" href={canonical} />}
+    {[headingFont, bodyFont, monoFont].map((font) => (
+      <link rel="preload" href={font} as="font" type="font/woff2" crossorigin="anonymous" />
+    ))}
     <link rel="icon" type="image/svg+xml" href={sitePath('mark.svg')} />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="Denis Peralta" />

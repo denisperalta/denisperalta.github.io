@@ -68,6 +68,37 @@ test.describe('Core portfolio', () => {
     await expect(page.getByRole('heading', { level: 1, name: 'Denis Peralta' })).toBeVisible();
   });
 
+  test('VISUAL-01 keeps the first painted text in place when fonts arrive late', async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== 'chromium', 'Uses Chromium paint timing to observe the fallback before releasing fonts');
+    const fonts = Promise.withResolvers<void>();
+    let fontRequests = 0;
+    await page.route('**/*.woff2', async (route) => {
+      fontRequests += 1;
+      await fonts.promise;
+      await route.continue();
+    });
+
+    const textBounds = () => page.locator('.header-inner nav, .name-last, .hero-intro, .hero-actions').evaluateAll((elements) =>
+      elements.map((element) => {
+        const { x, y, width, height } = element.getBoundingClientRect();
+        return [x, y, width, height].map(Math.round);
+      }),
+    );
+
+    try {
+      await page.goto('./', { waitUntil: 'domcontentloaded' });
+      await expect.poll(() => fontRequests).toBe(3);
+      await page.waitForFunction(() => performance.getEntriesByName('first-contentful-paint').length === 1);
+      const firstPaint = await textBounds();
+      fonts.resolve();
+      await page.waitForLoadState('load');
+      await page.evaluate(() => document.fonts.ready);
+      expect(await textBounds()).toEqual(firstPaint);
+    } finally {
+      fonts.resolve();
+    }
+  });
+
   test('PAGES-01 resolves local styles, fonts, metadata assets, and internal links', async ({ page, request, baseURL }) => {
     const base = new URL('./', baseURL);
     const requests = new Map<string, string>();
@@ -136,7 +167,11 @@ test.describe('Core portfolio', () => {
       }));
     });
     for (const { family, loaded } of fontStatuses) expect(loaded, family).toBe(true);
-    expect([...requests.values()]).toContain('font');
+    const fontRequests = [...requests].filter(([, type]) => type === 'font').map(([url]) => url);
+    const fontPreloads = await page.locator('link[rel="preload"][as="font"]').evaluateAll((links) =>
+      links.map((link) => (link as HTMLLinkElement).href),
+    );
+    expect(fontPreloads.sort()).toEqual(fontRequests.sort());
     for (const url of requests.keys()) {
       const asset = new URL(url);
       expect(asset.origin).toBe(base.origin);
@@ -259,42 +294,34 @@ test.describe('Keyboard and responsive boundaries', () => {
 });
 
 test.describe('Motion and progressive enhancement', () => {
-  test('MOTION-01 advances through both case panels on desktop scroll', async ({ page }, testInfo) => {
-    test.skip(testInfo.project.use.isMobile === true, 'Desktop-only scroll pinning');
-    await page.setViewportSize({ width: 1360, height: 900 });
+  test('MOTION-01 flows from the case cards to Experience and preserves Back', async ({ page }) => {
     await page.emulateMedia({ reducedMotion: 'no-preference' });
     await page.goto('./');
     await page.evaluate(() => document.fonts.ready);
-    const stage = page.locator('.showcase-stage');
-    const spacer = page.locator('.pin-spacer').filter({ has: stage });
-    await expect(spacer).toHaveCount(1);
-
-    for (const [index, entry] of cases.entries()) {
-      await page.locator('.showcase-track').evaluate((track, ratio) => {
-        const pinned = track.querySelector<HTMLElement>('.showcase-sticky')!;
-        const top = track.getBoundingClientRect().top + window.scrollY;
-        const distance = (track as HTMLElement).offsetHeight - pinned.offsetHeight;
-        window.scrollTo({ top: top + distance * ratio, behavior: 'instant' });
-      }, index === 0 ? 0.18 : 0.78);
-      await expect(stage).toHaveAttribute('data-active-case', entry.slug);
-      await expect(stage.getByText(entry.title, { exact: true })).toBeInViewport();
-    }
     await page.getByRole('link', { name: 'View selected work', exact: true }).click();
+    const work = page.locator('#work');
+    await expect(work.getByRole('link')).toHaveText(cases.map(({ title }) => title));
+    const travel = await page.locator('#experience').evaluate((experience) => {
+      const lastCard = document.querySelector('#work article:last-child');
+      if (!lastCard) throw new Error('The last work card is missing');
+      return (experience.getBoundingClientRect().top - lastCard.getBoundingClientRect().bottom) / innerHeight;
+    });
+    expect(travel).toBeLessThan(0.5);
+    for (const { title } of cases) await expect(work.getByText(title, { exact: true })).toHaveCount(1);
+
     const caseLink = page.getByRole('link', { name: cases[0].title, exact: true });
     await caseLink.scrollIntoViewIfNeeded();
     await caseLink.click();
+    await expect(page.getByRole('heading', { level: 1, name: cases[0].title })).toBeVisible();
     await page.goBack();
     await expect(page).toHaveURL(/#work$/);
-    await expect(spacer).toHaveCount(1);
-    await page.evaluate(() => document.fonts.ready);
-    await expect(caseLink).toBeInViewport({ ratio: 1 });
+    await expect(caseLink).toBeInViewport();
   });
 
   test('MOTION-01 presents static work when reduced motion is requested', async ({ page }) => {
     await page.emulateMedia({ reducedMotion: 'reduce' });
     await page.goto('./');
-    await expect(page.locator('.showcase-stage')).toBeHidden();
-    await expect(page.locator('.pin-spacer')).toHaveCount(0);
+    await expect(page.locator('.reading-progress')).toBeHidden();
     const work = page.locator('#work');
     for (const entry of cases) {
       const link = work.getByRole('link', { name: entry.title, exact: true });
@@ -312,8 +339,6 @@ test.describe('Motion and progressive enhancement', () => {
       await expect(page.getByRole('heading', { level: 1, name: 'Denis Peralta' })).toBeVisible();
       await page.getByRole('link', { name: 'View selected work', exact: true }).click();
       await expect(page).toHaveURL(/#work$/);
-      await expect(page.locator('.showcase-stage')).toBeHidden();
-      await expect(page.locator('.pin-spacer')).toHaveCount(0);
       await expect(page.locator('#work .work-card').getByRole('link')).toHaveText(cases.map(({ title }) => title));
       for (const { slug, title } of cases) {
         await page.getByRole('link', { name: title, exact: true }).click();

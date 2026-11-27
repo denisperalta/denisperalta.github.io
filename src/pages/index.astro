@@ -4,20 +4,18 @@ import Signal from '../components/Signal.astro';
 import CaseVisual from '../components/CaseVisual.astro';
 import { capabilities, caseStudies, credentials, freelance, profile } from '../data/portfolio';
 import { sitePath } from '../lib/paths';
-
-const desktopMotionQuery = '(min-width: 960px) and (min-height: 620px) and (prefers-reduced-motion: no-preference)';
 ---
 <SiteLayout title="Denis Peralta — QA Engineer" description={profile.intro}>
   <div class="reading-progress" aria-hidden="true"></div>
   <section class="frame hero" aria-labelledby="hero-title">
     <div class="hero-copy">
-      <p class="hero-role mono" data-hero-enter><span></span>{profile.role}</p>
+      <p class="hero-role mono"><span></span>{profile.role}</p>
       <h1 id="hero-title" class="hero-title" aria-label={profile.name}>
-        <span class="name-mask"><span class="name-line">Denis</span></span>
-        <span class="name-mask"><span class="name-line name-last">Peralta</span></span>
+        <span class="name-line">Denis</span>
+        <span class="name-line name-last">Peralta</span>
       </h1>
-      <p class="hero-intro" data-hero-enter>{profile.intro}</p>
-      <div class="hero-actions" data-hero-enter>
+      <p class="hero-intro">{profile.intro}</p>
+      <div class="hero-actions">
         <a class="button button-primary" href="#work">View selected work</a>
         <a class="button button-secondary" href="#contact">Get in touch</a>
       </div>
@@ -47,36 +45,9 @@ const desktopMotionQuery = '(min-width: 960px) and (min-height: 620px) and (pref
         </article>
       ))}
     </div>
-
-    <div class="showcase-track" data-motion-query={desktopMotionQuery} hidden aria-hidden="true">
-      <div class="showcase-sticky">
-        <div class="showcase-stage" data-active-case={caseStudies[0].slug}>
-          {caseStudies.map((study) => (
-            <div class="showcase-panel" data-case={study.slug}>
-              <div class="showcase-copy">
-                <p class="mono case-company">{study.company} / {study.role}</p>
-                <p class="showcase-title">{study.title}</p>
-                <p class="summary">{study.summary}</p>
-              </div>
-              <CaseVisual kind={study.kind} />
-            </div>
-          ))}
-          <div class="showcase-position">
-            {caseStudies.map((study) => <span data-case-marker={study.slug}>{study.company}</span>)}
-          </div>
-        </div>
-      </div>
-    </div>
-    <script is:inline>
-      {
-        const track = document.currentScript?.previousElementSibling;
-        if (track && window.matchMedia(track.dataset.motionQuery).matches) track.hidden = false;
-      }
-    </script>
-
   </section>
 
-  <div class="light-chapter" data-light-chapter>
+  <div class="light-chapter">
     <section id="experience" class="frame chapter" aria-labelledby="experience-title">
       <div class="chapter-heading">
         <h2 id="experience-title">Experience<span>.</span></h2>
